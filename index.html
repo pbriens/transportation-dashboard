@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Finance Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-blue: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: var(--primary-blue);
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .update-time {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-blue) 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        @media (min-width: 640px) {
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (min-width: 1024px) {
+            .metrics-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-light), var(--secondary));
+        }
+        
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .icon-blue { background: rgba(59, 130, 246, 0.1); color: var(--primary-blue); }
+        .icon-green { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .icon-orange { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .icon-purple { background: rgba(139, 92, 246, 0.1); color: var(--secondary); }
+        .icon-red { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        
+        .metric-title {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .metric-changes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .metric-change {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            gap: 4px;
+        }
+        
+        .metric-change.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .metric-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .metric-change.neutral {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+        }
+        
+        .metric-info {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (min-width: 1024px) {
+            .charts-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .chart-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chart-btn {
+            padding: 6px 12px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .chart-btn.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .chart-card.large .chart-container {
+            height: 400px;
+        }
+        
+        .arrow-up::before { content: '↑ '; }
+        .arrow-down::before { content: '↓ '; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚢 Transportation Finance Dashboard</h1>
+            <p class="update-time">Last updated: <span id="lastUpdate"></span></p>
+            <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh</button>
+            <button class="btn btn-secondary" onclick="exportData()">📥 Export CSV</button>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon icon-blue">%</div>
+                <div class="metric-title">US Fed Funds Rate</div>
+                <div class="metric-value">3.50-3.75%</div>
+                <div class="metric-changes">
+                    <div class="metric-change neutral">0% MoM</div>
+                    <div class="metric-change neutral"><span class="arrow-down"></span>19.2% YoY</div>
+                </div>
+                <div class="metric-info">Target range held (Jan 2026)</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-green">$</div>
+                <div class="metric-title">DXY Dollar Index</div>
+                <div class="metric-value">97.68</div>
+                <div class="metric-changes">
+                    <div class="metric-change negative"><span class="arrow-down"></span>3.1% MoM</div>
+                    <div class="metric-change negative"><span class="arrow-down"></span>9.58% YoY</div>
+                </div>
+                <div class="metric-info">Down from 108.52 peak</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-orange">¥</div>
+                <div class="metric-title">USD/JPY</div>
+                <div class="metric-value">¥157.21</div>
+                <div class="metric-changes">
+                    <div class="metric-change positive"><span class="arrow-up"></span>3.8% MoM</div>
+                    <div class="metric-change positive"><span class="arrow-up"></span>3.84% YoY</div>
+                </div>
+                <div class="metric-info">Yen weakness continues</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-purple">€</div>
+                <div class="metric-title">EUR/USD</div>
+                <div class="metric-value">€1.181</div>
+                <div class="metric-changes">
+                    <div class="metric-change positive"><span class="arrow-up"></span>3.4% MoM</div>
+                    <div class="metric-change positive"><span class="arrow-up"></span>14.22% YoY</div>
+                </div>
+                <div class="metric-info">4-year high for Euro</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-red">🛢️</div>
+                <div class="metric-title">Brent Crude Oil</div>
+                <div class="metric-value">$68.05/bbl</div>
+                <div class="metric-changes">
+                    <div class="metric-change positive"><span class="arrow-up"></span>13.8% MoM</div>
+                    <div class="metric-change negative"><span class="arrow-down"></span>10.75% YoY</div>
+                </div>
+                <div class="metric-info">Up from $59.8 Jan low</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-blue">⚓</div>
+                <div class="metric-title">Capesize Index</div>
+                <div class="metric-value">2,951</div>
+                <div class="metric-changes">
+                    <div class="metric-change positive"><span class="arrow-up"></span>9.2% MoM</div>
+                    <div class="metric-change positive"><span class="arrow-up"></span>168% YoY</div>
+                </div>
+                <div class="metric-info">Iron ore/coal carriers strong</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-green">🚢</div>
+                <div class="metric-title">Baltic Dry Index</div>
+                <div class="metric-value">1,923</div>
+                <div class="metric-changes">
+                    <div class="metric-change positive"><span class="arrow-up"></span>2.2% MoM</div>
+                    <div class="metric-change positive"><span class="arrow-up"></span>136% YoY</div>
+                </div>
+                <div class="metric-info">Strong recovery signal</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-orange">📦</div>
+                <div class="metric-title">Container Rates (FEU)</div>
+                <div class="metric-value">$2,850</div>
+                <div class="metric-changes">
+                    <div class="metric-change positive"><span class="arrow-up"></span>8.28% MoM</div>
+                    <div class="metric-change positive"><span class="arrow-up"></span>25% YoY</div>
+                </div>
+                <div class="metric-info">Asia-Europe route avg</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card full-width large">
+                <div class="chart-header">
+                    <h3 class="chart-title">📈 Interest Rates & Dollar Index</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn" onclick="updateChart('rates', '6M', this)">6M</button>
+                        <button class="chart-btn" onclick="updateChart('rates', '1Y', this)">1Y</button>
+                        <button class="chart-btn active" onclick="updateChart('rates', '2Y', this)">2Y</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="ratesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">💱 Currency Exchange Rates</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" onclick="updateChart('fx', '6M', this)">6M</button>
+                        <button class="chart-btn" onclick="updateChart('fx', '1Y', this)">1Y</button>
+                        <button class="chart-btn" onclick="updateChart('fx', '2Y', this)">2Y</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="fxChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">🛢️ Brent Oil Prices</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" onclick="updateChart('oil', '6M', this)">6M</button>
+                        <button class="chart-btn" onclick="updateChart('oil', '1Y', this)">1Y</button>
+                        <button class="chart-btn" onclick="updateChart('oil', '2Y', this)">2Y</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="oilChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">🚢 Baltic Dry & Capesize</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" onclick="updateChart('bdi', '6M', this)">6M</button>
+                        <button class="chart-btn" onclick="updateChart('bdi', '1Y', this)">1Y</button>
+                        <button class="chart-btn" onclick="updateChart('bdi', '2Y', this)">2Y</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="bdiChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">📦 Container Costs</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" onclick="updateChart('container', '6M', this)">6M</button>
+                        <button class="chart-btn" onclick="updateChart('container', '1Y', this)">1Y</button>
+                        <button class="chart-btn" onclick="updateChart('container', '2Y', this)">2Y</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="containerChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script>
+        function updateTimestamp() {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+        }
+        updateTimestamp();
+
+        const timeLabels = {
+            '6M': ['Aug 25', 'Sep 25', 'Oct 25', 'Nov 25', 'Dec 25', 'Jan 26', 'Feb 26'],
+            '1Y': ['Q1 25', 'Q2 25', 'Q3 25', 'Q4 25', 'Q1 26'],
+            '2Y': ['Q1 24', 'Q2 24', 'Q3 24', 'Q4 24', 'Q1 25', 'Q2 25', 'Q3 25', 'Q4 25', 'Q1 26']
+        };
+
+        const chartData = {
+            fedRate: {
+                '6M': [4.50, 4.50, 4.25, 3.875, 3.875, 3.625, 3.625],
+                '1Y': [4.50, 4.50, 4.25, 3.875, 3.625],
+                '2Y': [5.33, 5.33, 5.00, 4.50, 4.50, 4.50, 4.25, 3.875, 3.625]
+            },
+            dxy: {
+                '6M': [106.3, 104.8, 104.1, 102.5, 100.2, 100.8, 97.68],
+                '1Y': [108.5, 106.3, 104.1, 100.8, 97.68],
+                '2Y': [103.5, 105.2, 104.8, 104.2, 108.5, 106.3, 104.1, 100.8, 97.68]
+            },
+            usdjpy: {
+                '6M': [158.4, 160.8, 160.2, 153.2, 149.8, 151.4, 157.21],
+                '1Y': [155.8, 158.4, 160.2, 151.4, 157.21],
+                '2Y': [148.2, 154.8, 161.5, 152.3, 155.8, 158.4, 160.2, 151.4, 157.21]
+            },
+            eurusd: {
+                '6M': [1.067, 1.082, 1.095, 1.118, 1.135, 1.142, 1.181],
+                '1Y': [1.034, 1.067, 1.095, 1.142, 1.181],
+                '2Y': [1.082, 1.073, 1.091, 1.079, 1.034, 1.067, 1.095, 1.142, 1.181]
+            },
+            brent: {
+                '6M': [83.5, 85.2, 82.1, 76.8, 68.2, 59.8, 68.05],
+                '1Y': [76.2, 83.5, 82.1, 72.4, 68.05],
+                '2Y': [82.5, 89.2, 85.4, 74.8, 76.2, 83.5, 82.1, 72.4, 68.05]
+            },
+            bdi: {
+                '6M': [1245, 1423, 1608, 1498, 1756, 1882, 1923],
+                '1Y': [815, 1245, 1608, 1342, 1923],
+                '2Y': [1842, 2156, 1789, 1534, 815, 1245, 1608, 1342, 1923]
+            },
+            capesize: {
+                '6M': [1856, 2123, 2401, 2234, 2615, 2702, 2951],
+                '1Y': [1102, 1856, 2401, 2015, 2951],
+                '2Y': [2215, 2568, 2485, 1678, 1102, 1856, 2401, 2015, 2951]
+            },
+            container: {
+                '6M': [2450, 2520, 2680, 2590, 2720, 2650, 2850],
+                '1Y': [2280, 2450, 2680, 2590, 2850],
+                '2Y': [3200, 3450, 2850, 2420, 2280, 2450, 2680, 2590, 2850]
+            }
+        };
+
+        const opts = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
+            }
+        };
+
+        let charts = {};
+
+        window.addEventListener('load', function() {
+            charts.rates = new Chart(document.getElementById('ratesChart'), {
+                type: 'line',
+                data: {
+                    labels: timeLabels['2Y'],
+                    datasets: [{
+                        label: 'Fed Rate (%)',
+                        data: chartData.fedRate['2Y'],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'DXY Index',
+                        data: chartData.dxy['2Y'],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    ...opts,
+                    scales: {
+                        y: { position: 'left', title: { display: true, text: 'Fed Rate' } },
+                        y1: { position: 'right', title: { display: true, text: 'DXY' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+
+            charts.fx = new Chart(document.getElementById('fxChart'), {
+                type: 'line',
+                data: {
+                    labels: timeLabels['6M'],
+                    datasets: [{
+                        label: 'USD/JPY',
+                        data: chartData.usdjpy['6M'],
+                        borderColor: '#f59e0b',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'EUR/USD',
+                        data: chartData.eurusd['6M'],
+                        borderColor: '#8b5cf6',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    ...opts,
+                    scales: {
+                        y: { position: 'left' },
+                        y1: { position: 'right', grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+
+            charts.oil = new Chart(document.getElementById('oilChart'), {
+                type: 'line',
+                data: {
+                    labels: timeLabels['6M'],
+                    datasets: [{
+                        label: 'Brent ($/bbl)',
+                        data: chartData.brent['6M'],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: opts
+            });
+
+            charts.bdi = new Chart(document.getElementById('bdiChart'), {
+                type: 'line',
+                data: {
+                    labels: timeLabels['6M'],
+                    datasets: [{
+                        label: 'BDI',
+                        data: chartData.bdi['6M'],
+                        borderColor: '#14b8a6',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Capesize',
+                        data: chartData.capesize['6M'],
+                        borderColor: '#3b82f6',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    ...opts,
+                    scales: {
+                        y: { position: 'left' },
+                        y1: { position: 'right', grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+
+            charts.container = new Chart(document.getElementById('containerChart'), {
+                type: 'line',
+                data: {
+                    labels: timeLabels['6M'],
+                    datasets: [{
+                        label: 'Rate ($/FEU)',
+                        data: chartData.container['6M'],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: opts
+            });
+        });
+
+        function updateChart(name, period, btn) {
+            btn.parentElement.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const chart = charts[name];
+            chart.data.labels = timeLabels[period];
+            
+            if (name === 'rates') {
+                chart.data.datasets[0].data = chartData.fedRate[period];
+                chart.data.datasets[1].data = chartData.dxy[period];
+            } else if (name === 'fx') {
+                chart.data.datasets[0].data = chartData.usdjpy[period];
+                chart.data.datasets[1].data = chartData.eurusd[period];
+            } else if (name === 'oil') {
+                chart.data.datasets[0].data = chartData.brent[period];
+            } else if (name === 'bdi') {
+                chart.data.datasets[0].data = chartData.bdi[period];
+                chart.data.datasets[1].data = chartData.capesize[period];
+            } else if (name === 'container') {
+                chart.data.datasets[0].data = chartData.container[period];
+            }
+            
+            chart.update();
+        }
+
+        function refreshData() {
+            updateTimestamp();
+            alert('Data refreshed!');
+        }
+
+        function exportData() {
+            let csv = 'Metric,Current,MoM,YoY\n';
+            csv += 'Fed Rate,3.625%,0%,-19.2%\n';
+            csv += 'DXY,97.68,-3.1%,-9.58%\n';
+            csv += 'USD/JPY,157.21,+3.8%,+3.84%\n';
+            csv += 'EUR/USD,1.181,+3.4%,+14.22%\n';
+            csv += 'Brent,$68.05,+13.8%,-10.75%\n';
+            csv += 'Capesize,2951,+9.2%,+168%\n';
+            csv += 'BDI,1923,+2.2%,+136%\n';
+            csv += 'Container,$2850,+8.28%,+25%\n';
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transport-data.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
