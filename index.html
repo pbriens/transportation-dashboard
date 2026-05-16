@@ -343,7 +343,7 @@
             loadingMsg.textContent = 'Fetching SOFR from FRED...';
             try {
                 const sofrUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
-                const sofrResponse = await fetch(sofrUrl);
+                const sofrResponse = await fetch(CORS_PROXY + encodeURIComponent(sofrUrl));
                 const sofrData = await sofrResponse.json();
                 
                 if (sofrData.observations && sofrData.observations.length > 0) {
@@ -364,7 +364,7 @@
             loadingMsg.textContent = 'Fetching Brent crude from FRED...';
             try {
                 const brentUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=DCOILBRENTEU&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
-                const brentResponse = await fetch(brentUrl);
+                const brentResponse = await fetch(CORS_PROXY + encodeURIComponent(brentUrl));
                 const brentData = await brentResponse.json();
                 
                 if (brentData.observations && brentData.observations.length > 0) {
@@ -389,7 +389,7 @@
             
             try {
                 const jetUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=DJFUELUSGULF&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
-                const jetResponse = await fetch(jetUrl);
+                const jetResponse = await fetch(CORS_PROXY + encodeURIComponent(jetUrl));
                 const jetData = await jetResponse.json();
                 
                 if (jetData.observations && jetData.observations.length > 0) {
