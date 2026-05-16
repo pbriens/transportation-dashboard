@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #3b82f6; color: white; border: none; border-radius: 5px; }
+        button:hover { background: #2563eb; }
+        pre { background: #1f2937; color: #10b981; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .error { background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .success { background: #d1fae5; color: #065f46; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Netlify Function Test</h1>
+        <p>Click the button below to test if your API endpoint is working:</p>
+        
+        <button onclick="testAPI()">Test /api/market-data Endpoint</button>
+        
+        <h2>Response:</h2>
+        <pre id="response">Waiting for response...</pre>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = 'Testing...';
+            
+            try {
+                console.log('Fetching from /api/market-data...');
+                const response = await fetch('/api/market-data');
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                const text = await response.text();
+                console.log('Response text:', text);
+                
+                // Try to parse as JSON
+                try {
+                    const data = JSON.parse(text);
+                    responseDiv.innerHTML = '<div class="success">✅ Success!</div><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } catch (e) {
+                    responseDiv.innerHTML = '<div class="error">❌ Response is not valid JSON</div><pre>' + text + '</pre>';
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                responseDiv.innerHTML = '<div class="error">❌ Fetch Failed</div><pre>Error: ' + error.message + '\nType: ' + error.name + '</pre>';
+            }
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', testAPI);
+    </script>
+</body>
+</html>
