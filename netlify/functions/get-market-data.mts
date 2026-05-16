@@ -270,7 +270,13 @@ async function fetchExchangeRates(
 
 export default async (req: Request, context: Context) => {
   try {
+    // Log environment check
+    console.log("=== Function Start ===");
+    console.log("FRED_API_KEY set:", !!FRED_API_KEY);
+    console.log("EXCHANGE_RATE_API_KEY set:", !!EXCHANGE_RATE_API_KEY);
+    
     // Fetch all data in parallel
+
     const [sofr, brent, jetFuel, bdi, fxRates] = await Promise.all([
       fetchFredData("SOFR"),
       fetchFredData("DCOILBRENTEU"),
