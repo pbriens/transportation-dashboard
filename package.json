@@ -9,10 +9,10 @@
     "test": "echo 'Tests not configured'"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12"
+    "cheerio": "^1.0.0-rc.12",
+    "@netlify/functions": "^2.8.0"
   },
   "devDependencies": {
-    "@netlify/functions": "^2.8.0"
   },
   "engines": {
     "node": "18.x"
