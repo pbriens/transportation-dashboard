@@ -452,41 +452,18 @@
             loadingMsg.textContent = 'Fetching Baltic Dry Index...';
             let bdiFetched = false;
             
-            // Try BalticDryIndex.com first
+            // Try Trading Economics first (more reliable)
             try {
-                const bdiUrl = 'https://balticdryindex.com/';
-                const proxiedUrl = CORS_PROXY + encodeURIComponent(bdiUrl);
-                const bdiResponse = await fetch(proxiedUrl);
-                const bdiHtml = await bdiResponse.text();
+                const teUrl = 'https://tradingeconomics.com/commodity/baltic';
+                const proxiedUrl = CORS_PROXY + encodeURIComponent(teUrl);
+                const teResponse = await fetch(proxiedUrl);
+                const teHtml = await teResponse.text();
                 
-                // Extract BDI value from HTML
-                const bdiMatch = bdiHtml.match(/>\s*(\d{3,5})\s*</);
-                if (bdiMatch && bdiMatch[1]) {
-                    const bdi = parseInt(bdiMatch[1]);
-                    if (bdi > 500 && bdi < 10000) {
-                        document.getElementById('bdiValue').textContent = bdi.toLocaleString();
-                        document.getElementById('bdiSource').textContent = 'Source: balticdryindex.com';
-                        document.getElementById('bdiDate').textContent = new Date().toLocaleDateString();
-                        updates.push('✓ BDI: ' + bdi + ' (from balticdryindex.com)');
-                        successCount++;
-                        bdiFetched = true;
-                    }
-                }
-            } catch (e) {
-                console.log('BDI primary source failed:', e.message);
-            }
-
-            // Fallback to Trading Economics
-            if (!bdiFetched) {
-                try {
-                    const teUrl = 'https://tradingeconomics.com/commodity/baltic';
-                    const proxiedUrl = CORS_PROXY + encodeURIComponent(teUrl);
-                    const teResponse = await fetch(proxiedUrl);
-                    const teHtml = await teResponse.text();
-                    
-                    const bdiMatch = teHtml.match(/>\s*(\d{3,5})\s*</);
-                    if (bdiMatch && bdiMatch[1]) {
-                        const bdi = parseInt(bdiMatch[1]);
+                // Look for numbers that look like BDI (3-5 digits, in valid range)
+                const numberMatches = teHtml.match(/(\d{3,5})/g);
+                if (numberMatches) {
+                    for (let match of numberMatches) {
+                        const bdi = parseInt(match);
                         if (bdi > 500 && bdi < 10000) {
                             document.getElementById('bdiValue').textContent = bdi.toLocaleString();
                             document.getElementById('bdiSource').textContent = 'Source: tradingeconomics.com';
@@ -494,15 +471,45 @@
                             updates.push('✓ BDI: ' + bdi + ' (from tradingeconomics.com)');
                             successCount++;
                             bdiFetched = true;
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('BDI Trading Economics failed:', e.message);
+            }
+
+            // Fallback to BalticDryIndex.com
+            if (!bdiFetched) {
+                try {
+                    const bdiUrl = 'https://balticdryindex.com/';
+                    const proxiedUrl = CORS_PROXY + encodeURIComponent(bdiUrl);
+                    const bdiResponse = await fetch(proxiedUrl);
+                    const bdiHtml = await bdiResponse.text();
+                    
+                    // Look for numbers that look like BDI
+                    const numberMatches = bdiHtml.match(/(\d{3,5})/g);
+                    if (numberMatches) {
+                        for (let match of numberMatches) {
+                            const bdi = parseInt(match);
+                            if (bdi > 500 && bdi < 10000) {
+                                document.getElementById('bdiValue').textContent = bdi.toLocaleString();
+                                document.getElementById('bdiSource').textContent = 'Source: balticdryindex.com';
+                                document.getElementById('bdiDate').textContent = new Date().toLocaleDateString();
+                                updates.push('✓ BDI: ' + bdi + ' (from balticdryindex.com)');
+                                successCount++;
+                                bdiFetched = true;
+                                break;
+                            }
                         }
                     }
                 } catch (e) {
-                    console.log('BDI fallback source failed:', e.message);
+                    console.log('BDI BalticDryIndex failed:', e.message);
                 }
             }
 
             if (!bdiFetched) {
-                updates.push('✗ BDI fetch failed');
+                updates.push('✗ BDI fetch failed - both sources unavailable');
             }
 
             // Display results
